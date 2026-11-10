@@ -15,7 +15,7 @@ Projects that use AI and automation to make IT operations faster, safer, and eas
 An n8n + Slack pipeline that watches SaaS vendor status feeds, separates vendor-reported severity from verified internal impact, routes incidents to the right application owner, drafts approved communications, escalates to SRE/on-call, and keeps one deduplicated record in Jira or ServiceNow.
 
 - **Working Phase 1 workflow:** polls Slack, Okta, and Google Workspace status feeds every 15 minutes, deduplicates, posts to `#saas-alerts`, and DMs app owners about major incidents
-- 12 tests replay a full incident lifecycle (new, repeat, resolved, disappeared, feed outage) against synthetic vendor feeds, run in CI
+- 15 tests replay a full incident lifecycle (new, repeat, resolved, disappeared, feed outage) against synthetic vendor feeds, run in CI
 - Mermaid architecture covering detection, triage, owner validation, and recovery
 - Internal P1–P4 priority policy that doesn't treat a vendor "major outage" as an automatic P1
 - Deduplication and idempotency design so one vendor incident never opens two tickets

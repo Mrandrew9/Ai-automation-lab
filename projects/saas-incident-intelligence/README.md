@@ -53,7 +53,9 @@ flowchart LR
 3. Attach a Slack credential with `chat:write` to both Slack nodes, and create `#saas-alerts`.
 4. Activate the workflow. Deduplication state is stored in n8n's workflow static data, which persists only for active (production) executions, so manual test runs always look like the first run.
 
-**Tests.** [`tests/phase1.test.js`](tests/phase1.test.js) replays an incident lifecycle (new, repeat, update, resolved, disappeared, feed outage, 30-day pruning) against synthetic feeds in [`tests/fixtures/`](tests/fixtures) shaped like each vendor's real format. It also covers the injection cases. CI validates the workflow and runs the tests on every push.
+**Tests.** [`tests/phase1.test.js`](tests/phase1.test.js) replays an incident lifecycle (new, repeat, update, resolved, disappeared, feed outage, 30-day pruning) against synthetic feeds in [`tests/fixtures/`](tests/fixtures) shaped like each vendor's real format. It also covers injection cases and lookalike domains. CI validates the workflow and runs the tests on every push.
+
+**Verified in n8n.** The workflow imports into n8n 2.46.7, and every node parameter checks out against n8n's own node definitions. An end-to-end run in n8n, with the Slack nodes removed and the sample feeds served locally, produced the expected 3 events and 4 owner DMs.
 
 ```bash
 python scripts/validate_workflows.py

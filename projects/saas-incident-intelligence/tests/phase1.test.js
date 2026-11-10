@@ -148,6 +148,29 @@ test('closed incidents are pruned after 30 days', () => {
   assert.strictEqual(state.incidents['slack:9001'], undefined);
 });
 
+test('incident links keep the specific page on the vendor host', () => {
+  const events = poll({}, feeds);
+  assert.strictEqual(byVendor(events, 'slack')[0].source_url, 'https://slack-status.com/2026-11/example9001');
+  assert.strictEqual(byVendor(events, 'okta')[0].source_url, 'https://status.okta.com/#incident/EXAMPLE00000001AAA');
+});
+
+test('link checks work without the URL class (some n8n sandboxes lack it)', () => {
+  const body = 'const URL = undefined;\n' + code('Normalize & Deduplicate');
+  const events = run(body, { input: [feeds.slack, feeds.okta, feeds.google], refs: { 'Load Application Registry': registry } });
+  assert.strictEqual(byVendor(events, 'slack')[0].source_url, 'https://slack-status.com/2026-11/example9001');
+  assert.strictEqual(byVendor(events, 'google_workspace')[0].source_url, 'https://www.google.com/appsstatus/dashboard/incidents/exampleGws001');
+});
+
+test('lookalike hosts and Slack link-breaking characters are rejected', () => {
+  const app = registry[0];
+  const tricky = JSON.parse(fixture('slack-current-active.json'));
+  for (const url of ['https://slack-status.com.evil.example/x', 'https://evil.example/@slack-status.com', 'http://slack-status.com/x', 'https://slack-status.com/x|Click here>']) {
+    tricky.active_incidents[0].url = url;
+    const [e] = run(code('Normalize & Deduplicate'), { input: [ok(JSON.stringify(tricky))], refs: { 'Load Application Registry': [app] } });
+    assert.strictEqual(e.source_url, app.status_page_url, url);
+  }
+});
+
 test('owner DMs go to each owner once, only for events that need action', () => {
   const events = poll({}, feeds);
   events.push({ ...events[0], primary_slack_user_id: 'USAME', secondary_slack_user_id: 'USAME' });
