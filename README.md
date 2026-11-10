@@ -21,6 +21,11 @@ A custom GPT agent that generates structured change and incident requests from n
 - Improves tracking and reduces ticket creation time  
 - Enables faster response and approval workflows  
 
+### 🔹 Enterprise SaaS Incident Intelligence & Automated Response
+A proposed n8n + Slack incident intelligence workflow that monitors vendor status feeds, routes major advisories to application owners, coordinates IT/SRE communications, and tracks incidents in Jira or ServiceNow.
+- Includes Mermaid architecture, severity classification, deduplication, incident lifecycle, and implementation checklist
+- **[View architecture and implementation blueprint](projects/saas-incident-intelligence/README.md)**
+
 ### 🔹 Workflow & Automation Experiments  
 Various experiments that connect internal tools (e.g., Slack, Okta, Postman APIs) to automate repetitive actions such as status updates, reminders, or data collection.  
 - Demonstrates AI-assisted operations  
