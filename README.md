@@ -1,5 +1,7 @@
 # 🧠 AI Automation Lab
 
+![ci](https://github.com/Mrandrew9/Ai-automation-lab/actions/workflows/ci.yml/badge.svg)
+
 Projects that use AI and automation to make IT operations faster, safer, and easier to run, with a human kept in the loop wherever a decision matters.
 
 ---
@@ -8,10 +10,12 @@ Projects that use AI and automation to make IT operations faster, safer, and eas
 
 ### 🔹 [Enterprise SaaS Incident Intelligence & Automated Response](projects/saas-incident-intelligence/README.md)
 
-**Status:** solution architecture (design blueprint, not yet deployed)
+**Status:** Phase 1 (detection) built as a tested n8n workflow. Phases 2–3 designed.
 
 An n8n + Slack pipeline that watches SaaS vendor status feeds, separates vendor-reported severity from verified internal impact, routes incidents to the right application owner, drafts approved communications, escalates to SRE/on-call, and keeps one deduplicated record in Jira or ServiceNow.
 
+- **Working Phase 1 workflow:** polls Slack, Okta, and Google Workspace status feeds every 15 minutes, deduplicates, posts to `#saas-alerts`, and DMs app owners about major incidents
+- 12 tests replay a full incident lifecycle (new, repeat, resolved, disappeared, feed outage) against synthetic vendor feeds, run in CI
 - Mermaid architecture covering detection, triage, owner validation, and recovery
 - Internal P1–P4 priority policy that doesn't treat a vendor "major outage" as an automatic P1
 - Deduplication and idempotency design so one vendor incident never opens two tickets
@@ -62,8 +66,8 @@ A custom GPT that turns natural-language descriptions into structured change and
 
 ## 🧭 Next
 
-- Build Phase 1 of the incident intelligence pipeline as an importable n8n workflow: pilot vendors, 15-minute polling, deduplication, owner DMs
-- Add synthetic incident fixtures and tests for duplicate, out-of-order, and resolved events
+- Incident intelligence Phase 2: Jira/ServiceNow incident upsert and interactive Slack acknowledgment
+- Incident intelligence Phase 3: Slack-independent fallback alerts and detection-latency metrics
 
 ---
 

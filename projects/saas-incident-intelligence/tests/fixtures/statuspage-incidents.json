@@ -1,0 +1,22 @@
+{
+  "incidents": [
+    {
+      "id": "exsp001",
+      "name": "Jira search degraded",
+      "status": "investigating",
+      "impact": "major",
+      "shortlink": "https://evil.example.com/phish",
+      "updated_at": "2026-11-09T22:00:00Z",
+      "components": [
+        {
+          "name": "Jira"
+        }
+      ],
+      "incident_updates": [
+        {
+          "body": "Investigating."
+        }
+      ]
+    }
+  ]
+}

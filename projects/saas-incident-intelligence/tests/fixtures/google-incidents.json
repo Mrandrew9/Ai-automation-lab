@@ -1,0 +1,42 @@
+[
+  {
+    "id": "exampleGws001",
+    "begin": "2026-11-09T21:00:00+00:00",
+    "created": "2026-11-09T21:05:00+00:00",
+    "modified": "2026-11-09T21:30:00+00:00",
+    "external_desc": "Gmail: some users are experiencing delays sending mail",
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "affected_products": [
+      {
+        "title": "Gmail",
+        "id": "gmail"
+      }
+    ],
+    "most_recent_update": {
+      "status": "SERVICE_DISRUPTION",
+      "text": "We are investigating."
+    },
+    "uri": "incidents/exampleGws001"
+  },
+  {
+    "id": "exampleGws000",
+    "begin": "2026-08-01T10:00:00+00:00",
+    "end": "2026-08-01T12:00:00+00:00",
+    "modified": "2026-08-01T12:00:00+00:00",
+    "external_desc": "Meet outage (historical)",
+    "status_impact": "SERVICE_OUTAGE",
+    "severity": "high",
+    "affected_products": [
+      {
+        "title": "Google Meet",
+        "id": "meet"
+      }
+    ],
+    "most_recent_update": {
+      "status": "AVAILABLE",
+      "text": "Resolved."
+    },
+    "uri": "incidents/exampleGws000"
+  }
+]

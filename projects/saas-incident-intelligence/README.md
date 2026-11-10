@@ -1,6 +1,8 @@
 # Enterprise SaaS Incident Intelligence & Automated Response
 
-> **Status:** Proposed solution architecture (not deployed)  
+![ci](https://github.com/Mrandrew9/Ai-automation-lab/actions/workflows/ci.yml/badge.svg)
+
+> **Status:** Phase 1 (detection) built as an importable, tested n8n workflow. Phases 2–3 are designed below, not yet built.  
 > **Primary technologies:** n8n, Slack, SaaS vendor status feeds/APIs, Jira or ServiceNow, SRE/on-call tools  
 > **Purpose:** Reduce time to detect, route, communicate, track, and resolve third-party SaaS incidents.
 
@@ -11,6 +13,52 @@ Enterprise IT teams depend on many SaaS vendors, but vendor status notifications
 **Design principle:** Monitor vendor sources directly in n8n wherever possible; use Slack's `#saas-alerts` channel as a visibility and collaboration layer, not as the only system of record. A Slack-triggered ingestion path may supplement direct monitoring.
 
 **Important distinction:** A vendor-reported “major outage” does **not** necessarily mean an internal P1. Internal priority depends on enterprise tenant, geography, feature criticality, and verified user impact.
+
+## Phase 1: built and tested
+
+[`workflow/phase1-detection.json`](workflow/phase1-detection.json) is a working n8n workflow for the pilot vendors. It covers Workflow A below and the owner notification step of Workflow B.
+
+```mermaid
+flowchart LR
+    A["Every 15 minutes"] --> B["Application registry<br/>Slack · Okta · Google Workspace"]
+    B --> C["Fetch each vendor's status feed"]
+    C --> D["Normalize + deduplicate<br/>(state kept between runs)"]
+    D --> E["#saas-alerts<br/>every new or changed event"]
+    D --> F["DM primary + secondary owner<br/>major impact on critical apps"]
+```
+
+| Vendor | Source | Format |
+|---|---|---|
+| Slack | `slack-status.com/api/v2.0.0/current` | JSON, active incidents only |
+| Okta | `status.okta.com/services/xml/OktaTrustRSS` | Atom feed |
+| Google Workspace | `google.com/appsstatus/dashboard/incidents.json` | JSON incident history |
+| Any Atlassian Statuspage vendor | `<status page>/api/v2/incidents.json` | JSON (adapter included, disabled in the pilot) |
+
+**How it behaves**
+
+| Situation | What happens |
+|---|---|
+| New active incident | Posted to `#saas-alerts`. If the vendor rates it major or critical and the app is critical or high, both owners get a DM. |
+| Same incident on the next poll | Nothing. Only a change in status, impact, or affected components counts as news. |
+| Vendor marks it resolved | Owners are asked to confirm internal recovery. Nothing is closed automatically. |
+| Incident disappears from a feed that lists only active incidents (Slack) | Flagged as "no longer listed: verify before closing", never treated as resolved. |
+| Old or already-resolved incidents in a feed's history | Ignored, so the first run doesn't flood the channel. |
+| A feed fails twice in a row (timeout, error, unparseable) | `#saas-alerts` gets a "status feed failing" warning, at most once an hour per vendor. |
+| Feed text contains HTML, `<!channel>`, or Slack link markup | Stripped and escaped before posting. Links are only allowed to the vendor's own status host. |
+
+**Setup**
+
+1. Import the workflow (**Workflows → Import from File**).
+2. In **Load Application Registry**, replace the placeholder Slack user IDs with each app's owner and secondary admin.
+3. Attach a Slack credential with `chat:write` to both Slack nodes, and create `#saas-alerts`.
+4. Activate the workflow. Deduplication state is stored in n8n's workflow static data, which persists only for active (production) executions, so manual test runs always look like the first run.
+
+**Tests.** [`tests/phase1.test.js`](tests/phase1.test.js) replays an incident lifecycle (new, repeat, update, resolved, disappeared, feed outage, 30-day pruning) against synthetic feeds in [`tests/fixtures/`](tests/fixtures) shaped like each vendor's real format. It also covers the injection cases. CI validates the workflow and runs the tests on every push.
+
+```bash
+python scripts/validate_workflows.py
+node --test $(find projects -name '*.test.js')
+```
 
 ## Objectives
 
@@ -266,16 +314,16 @@ For unconfirmed impact, state that the issue is *vendor-reported* and do not imp
 
 ## Acceptance criteria
 
-- [ ] Every enabled vendor is checked on schedule or via supported webhook.
-- [ ] Duplicate source events do not create duplicate incident tickets or primary Slack messages.
-- [ ] A new material vendor incident is routed to the configured primary and secondary owners.
-- [ ] Vendor severity and internal impact are recorded separately.
+- [x] Every enabled vendor is checked on schedule or via supported webhook. *(Phase 1)*
+- [ ] Duplicate source events do not create duplicate incident tickets or primary Slack messages. *(Slack messages: Phase 1. Tickets: Phase 2.)*
+- [x] A new material vendor incident is routed to the configured primary and secondary owners. *(Phase 1)*
+- [x] Vendor severity and internal impact are recorded separately. *(Phase 1)*
 - [ ] Employee-wide announcements require configured policy/approval gates.
 - [ ] Confirmed P1 events reach the SRE/on-call path, including a Slack-independent fallback.
 - [ ] Incident-state updates amend existing Slack threads and tickets.
-- [ ] Vendor “resolved” does not silently close an internally active incident.
-- [ ] Failure/timeout conditions create visible operational alerts.
-- [ ] All integration credentials remain out of source control.
+- [x] Vendor “resolved” does not silently close an internally active incident. *(Phase 1)*
+- [ ] Failure/timeout conditions create visible operational alerts. *(Feed failures: Phase 1. n8n execution and ticket API errors: Phase 3.)*
+- [x] All integration credentials remain out of source control. *(enforced by CI)*
 
 ## Relevant documentation
 
@@ -287,4 +335,4 @@ For unconfirmed impact, state that the issue is *vendor-reported* and do not imp
 
 ---
 
-**Scope note:** This repository document is a design blueprint, not an exported or deployed n8n workflow. Connecting SaaS status sources, authenticating integrations, and implementing production-specific policies are required before operational use.
+**Scope note:** Phase 1 is an importable, tested n8n workflow. Phases 2–3 (ticketing, interactive acknowledgment, SRE escalation, Slack-independent fallback) remain a design blueprint. Feed formats were built against vendor documentation and synthetic fixtures; run the pilot against live feeds and tune before relying on it operationally.
