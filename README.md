@@ -17,8 +17,8 @@ flowchart LR
     V --> N["Normalize + deduplicate"]
     N --> S["Slack #saas-alerts"]
     N --> O["Primary + backup owner DMs"]
-    N -. "planned" .-> I["Incident tracking + validation"]
-    I -. "planned" .-> C["IT / SRE escalation + recovery"]
+    N -.-> I["Planned: incident tracking + validation"]
+    I -.-> C["Planned: IT / SRE escalation + recovery"]
 ```
 
 **Explore the implementation:** [Architecture and operations guide](projects/saas-incident-intelligence/README.md) · [Importable n8n workflow](projects/saas-incident-intelligence/workflow/phase1-detection.json) · [Synthetic lifecycle tests](projects/saas-incident-intelligence/tests/phase1.test.js)
