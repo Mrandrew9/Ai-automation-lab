@@ -6,6 +6,41 @@ Projects that use AI and automation to make IT operations faster, safer, and eas
 
 ---
 
+## Featured architecture · SaaS Incident Intelligence
+
+A concrete example of translating enterprise IT operations into a **tested, event-driven workflow**. The currently implemented Phase 1 monitors vendor status sources, normalizes and deduplicates updates, and sends targeted Slack alerts. Jira/ServiceNow incident management and on-call escalation are documented designs for later phases.
+
+```mermaid
+flowchart LR
+    T["15-minute schedule"] --> R["Vendor registry"]
+    R --> V["Slack / Okta / Google Workspace status"]
+    V --> N["Normalize + deduplicate"]
+    N --> S["Slack #saas-alerts"]
+    N --> O["Primary + backup owner DMs"]
+    N -. "planned" .-> I["Incident tracking + validation"]
+    I -. "planned" .-> C["IT / SRE escalation + recovery"]
+```
+
+**Explore the implementation:** [Architecture and operations guide](projects/saas-incident-intelligence/README.md) · [Importable n8n workflow](projects/saas-incident-intelligence/workflow/phase1-detection.json) · [Synthetic lifecycle tests](projects/saas-incident-intelligence/tests/phase1.test.js)
+
+**How to try the pilot**
+
+1. Download the JSON above and import it into n8n.
+2. In **Load Application Registry**, replace sample Slack user IDs with test-workspace user IDs.
+3. Create a test `#saas-alerts` channel and attach a Slack credential to the alert and DM nodes.
+4. Start with a test workspace and review the existing safeguards before activating the 15-minute schedule.
+
+Run the repository's code-node validation and test suite without live SaaS credentials:
+
+```bash
+python scripts/validate_workflows.py
+node --test $(find projects -name '*.test.js')
+```
+
+**Demo evidence:** The Mermaid diagram is generated from the documented workflow. Actual n8n canvas and Slack screenshots should be captured from a sanitized test workspace; no live-tenant screenshots are included here. The pilot is not a production-ready incident-response platform without deployment-specific configuration, credential handling, fallback communications, and operational testing.
+
+---
+
 ## 📂 In this repo
 
 ### 🔹 [Enterprise SaaS Incident Intelligence & Automated Response](projects/saas-incident-intelligence/README.md)
